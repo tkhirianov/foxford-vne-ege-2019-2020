@@ -5,19 +5,19 @@ WIDTH, HEIGHT = 450, 380
 
 # ========= Model ==========
 def flier_init():
-    global flier, flier_x, flier_y, flier_width, flier_height
-    flier_x, flier_y = 150, 225
-    flier_width, flier_height = 100, 50
-    flier = canvas.create_rectangle(flier_x,
-                                    flier_y,
-                                    flier_x + flier_width,
-                                    flier_y + flier_height,
-                                    fill="blue")
+    global flier, flier_image
+    global flier_x, flier_y, flier_width, flier_height
+    flier_image = tk.PhotoImage(file="ball.png")
+    flier_x, flier_y = 50, 75
+    flier_width = flier_image.width()
+    flier_height = flier_image.height()
+    flier = canvas.create_image(flier_x,
+                                flier_y,
+                                image=flier_image)
 
 def flier_move():
     global flier_x
-    canvas.coords(flier, flier_x, flier_y,
-                  flier_x + flier_width, flier_y + flier_height)
+    canvas.coords(flier, flier_x, flier_y)
     flier_x += 1
 
 
