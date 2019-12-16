@@ -2,12 +2,13 @@ from random import randint
 import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
+DT = 1
 
 
 # ========= Model ==========
 def ball_init():
-    global ball_id, ball_image
-    global ball_x, ball_y, ball_radius
+    global ball_id, ball_image, ball_radius
+    global ball_x, ball_y, ball_vx, ball_vy
     ball_image = tk.PhotoImage(file="ball.png")
     ball_width = ball_image.width()
     ball_height = ball_image.height()
@@ -15,14 +16,28 @@ def ball_init():
     ball_radius = ball_width // 2
     ball_x = randint(ball_radius, WIDTH - ball_radius - 1)
     ball_y = randint(ball_radius, HEIGHT - ball_radius - 1)    
-    ball_id = canvas.create_image(ball_x,
-                                ball_y,
-                                image=ball_image)
+    ball_vx = randint(-5, +5)
+    ball_vy = randint(-5, +5)
+    ball_id = canvas.create_image(ball_x, ball_y, image=ball_image)
+
 
 def ball_move():
-    global ball_x
+    global ball_x, ball_y, ball_vx, ball_vy
     canvas.coords(ball_id, ball_x, ball_y)
-    ball_x += 1
+    ball_x += ball_vx * DT
+    ball_y += ball_vy * DT
+    if ball_x <= ball_radius:
+        ball_x = ball_radius
+        ball_vx = -ball_vx
+    if ball_y <= ball_radius:
+        ball_y = ball_radius
+        ball_vy = -ball_vy
+    if ball_x >= WIDTH - ball_radius - 1:
+        ball_x = WIDTH - ball_radius - 1
+        ball_vx = -ball_vx
+    if ball_y >= HEIGHT - ball_radius - 1:
+        ball_y = HEIGHT - ball_radius - 1
+        ball_vy = -ball_vy
 
 
 # ======== Control and View ========
