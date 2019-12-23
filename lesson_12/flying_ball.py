@@ -37,37 +37,44 @@ class Ball:
             self.y = HEIGHT - self.radius - 1
             self.vy = -self.vy
 
+    def is_inside(self, x, y):
+        squared_distance = (self.x - x)**2 + (self.y - y)**2
+        return squared_distance <= self.radius**2
+
 
 # ======== Control and View ========
 def canvas_click_handler(event):
-    global scores, ball
-    # print(event.x, event.y)
-    squared_distance = (ball.x - event.x)**2 + (ball.y - event.y)**2
-    if squared_distance <= ball.radius**2:
+    global scores, balls
+    ball_to_delete = None
+    for ball in balls:
+        if ball.is_inside(event.x, event.y):
+            ball_to_delete = ball
+    if ball_to_delete is not None:
         scores += 10
         scores_label["text"] = str(scores)
-
-        canvas.delete(ball.id)
-        ball = Ball()
+        canvas.delete(ball_to_delete.id)
+        balls.remove(ball_to_delete)
 
 
 def restart_button_handler():
-    global scores, ball
+    global scores, balls
     scores = 0
     scores_label["text"] = str(scores)
 
-    canvas.delete(ball.id)
-    ball = Ball()
+    for ball in balls:
+        canvas.delete(ball.id)
+    balls[:] = [Ball() for i in range(5)]
     print("Типа перезапустили игру...")
 
 
 def next_frame_job(n):
-    ball.move()
+    for ball in balls:
+        ball.move()
     canvas.after(20, next_frame_job, n+1)
 
 
 def initilization():
-    global root, canvas, scores, scores_label, ball
+    global root, canvas, scores, scores_label, balls
     root = tk.Tk()
     # создаём холст:
     canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH,
@@ -82,7 +89,7 @@ def initilization():
                                command=restart_button_handler)
     restart_button.pack()
 
-    ball = Ball()
+    balls = [Ball() for i in range(5)]
 
     # привязка событий:
     canvas.bind("<Button-1>", canvas_click_handler)
