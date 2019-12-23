@@ -7,7 +7,7 @@ DT = 1
 
 # ========= Model ==========
 class Ball:
-    def init(self):
+    def __init__(self):
         self.image = tk.PhotoImage(file="ball.png")
         self.width = self.image.width()
         self.height = self.image.height()
@@ -19,7 +19,6 @@ class Ball:
         self.vx = randint(-5, +5)
         self.vy = randint(-5, +5)
         self.id = canvas.create_image(self.x, self.y, image=self.image)
-
 
     def move(self):
         canvas.coords(self.id, self.x, self.y)
@@ -41,22 +40,24 @@ class Ball:
 
 # ======== Control and View ========
 def canvas_click_handler(event):
-    global scores
+    global scores, ball
     # print(event.x, event.y)
     squared_distance = (ball.x - event.x)**2 + (ball.y - event.y)**2
     if squared_distance <= ball.radius**2:
         scores += 10
         scores_label["text"] = str(scores)
+
         canvas.delete(ball.id)
-        ball.init()
+        ball = Ball()
 
 
 def restart_button_handler():
-    global scores
+    global scores, ball
     scores = 0
     scores_label["text"] = str(scores)
+
     canvas.delete(ball.id)
-    ball.init()
+    ball = Ball()
     print("Типа перезапустили игру...")
 
 
@@ -82,7 +83,6 @@ def initilization():
     restart_button.pack()
 
     ball = Ball()
-    ball.init()
 
     # привязка событий:
     canvas.bind("<Button-1>", canvas_click_handler)
