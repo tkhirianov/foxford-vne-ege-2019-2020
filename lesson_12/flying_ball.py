@@ -2,7 +2,8 @@ from random import randint
 import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
-DT = 1
+DT = 0.2
+GRAVITY_CONSTANT = 3
 
 
 # ========= Model ==========
@@ -23,13 +24,12 @@ class Ball:
     def move(self):
         canvas.coords(self.id, self.x, self.y)
         self.x += self.vx * DT
-        self.y += self.vy * DT
+        self.y += self.vy * DT + GRAVITY_CONSTANT * DT**2 / 2
+        self.vy += GRAVITY_CONSTANT * DT
+
         if self.x <= self.radius:
             self.x = self.radius
             self.vx = -self.vx
-        if self.y <= self.radius:
-            self.y = self.radius
-            self.vy = -self.vy
         if self.x >= WIDTH - self.radius - 1:
             self.x = WIDTH - self.radius - 1
             self.vx = -self.vx
