@@ -2,11 +2,13 @@ from random import randint
 import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
-DT = 0.2
+DT = 0.5
 GRAVITY_CONSTANT = 3
 START_PAUSE = 1000
 FRAME_TIME = 20  #microseconds
 TANK_RADIUS = 25
+MIN_BUBBLE_RADIUS = 30
+MAX_BUBBLE_RADIUS = 40
 
 # ========= Model ==========
 
@@ -71,6 +73,20 @@ class Bubble:
             self.y = HEIGHT - self.r
             self.vy = -self.vy
 
+    def is_inside(self, other):
+        """ Проверяет, находятся ли шарики в пересечении (столкновении). """
+        dx = self.x - other.x
+        dy = self.y - other.y
+        squared_distance = dx**2 + dy**2
+        squared_radius_sum = (self.r + other.r)**2
+        return squared_distance <= squared_radius_sum
+
+    def collide(self, other):
+        """ Обмен скоростями при столновении. """
+        self.vx, other.vx = other.vx, self.vx
+        self.vy, other.vy = other.vy, self.vy
+        # FIXME!
+
 class GameRound:
     """ Игровой раунд.
         Здесь в атрибутах содержатся ссылки на:
@@ -86,10 +102,11 @@ class GameRound:
         self._shells = []
 
         bubbles_number = difficulty * 5
-        bubbles_max_speed = difficulty * 2
+        bubbles_max_speed = difficulty * 5
         self._targets = []
         for i in range(bubbles_number):
-            r = randint(10 - difficulty, 25 - difficulty)
+            r = randint(MIN_BUBBLE_RADIUS - difficulty,
+                        MAX_BUBBLE_RADIUS - difficulty)
             x = randint(r + 1, WIDTH - 1 - r)
             y = randint(r + 1, HEIGHT - 1 - r)
             Vx = randint(-bubbles_max_speed, +bubbles_max_speed)
@@ -100,6 +117,13 @@ class GameRound:
     def handle_frame(self):
         for target in self._targets:
             target.move()
+        # Попарное взаимодействие целей друг с другом
+        for i in range(len(self._targets) - 1):
+            for k in range(i + 1, len(self._targets)):
+                target_1 = self._targets[i]
+                target_2 = self._targets[k]
+                if target_1.is_inside(target_2):
+                    target_1.collide(target_2)
 
     def handle_click(self, event):
         print('handled click')
@@ -125,7 +149,7 @@ class MainWindow:
         canvas = tk.Canvas(self._root, height=HEIGHT, width=WIDTH,
                            background="lightblue", border=3)
         canvas.pack()
-        self._game = GameRound(canvas, 3)
+        self._game = GameRound(canvas, 1)
         canvas.bind("<Button-1>", self._handle_click)
         canvas.after(START_PAUSE, self._handle_frame)
 
