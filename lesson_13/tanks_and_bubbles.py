@@ -51,6 +51,25 @@ class Bubble:
         self._canvas = canvas
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="cyan")
 
+    def move(self):
+        self._canvas.coords(self.id,
+                            self.x - self.r, self.y - self.r,
+                            self.x + self.r, self.y + self.r)
+        self.x += self.vx * DT
+        self.y += self.vy * DT
+
+        if self.x < self.r:
+            self.x = self.r
+            self.vx = -self.vx
+        if self.x > WIDTH - self.r:
+            self.x = WIDTH - self.r
+            self.vx = -self.vx
+        if self.y < self.r:
+            self.y = self.r
+            self.vy = -self.vy
+        if self.y > HEIGHT - self.r:
+            self.y = HEIGHT - self.r
+            self.vy = -self.vy
 
 class GameRound:
     """ Игровой раунд.
@@ -79,7 +98,8 @@ class GameRound:
             self._targets.append(bubble)
 
     def handle_frame(self):
-        print('handled frame')
+        for target in self._targets:
+            target.move()
 
     def handle_click(self, event):
         print('handled click')
@@ -98,14 +118,14 @@ class MainWindow:
         self._restart_button = tk.Button(self._root, text="Перезапустить игру",
                                          command=self._restart_button_handler)
         self._restart_button.pack()
-        self._root.geometry(str(WIDTH)+ 'x' + str(HEIGHT + 35))  # костыль!
+        self._root.geometry(str(WIDTH + 10)+ 'x' + str(HEIGHT + 35))  # костыль!
         self._game = None
 
     def start_game(self):
         canvas = tk.Canvas(self._root, height=HEIGHT, width=WIDTH,
                            background="lightblue", border=3)
         canvas.pack()
-        self._game = GameRound(canvas)
+        self._game = GameRound(canvas, 3)
         canvas.bind("<Button-1>", self._handle_click)
         canvas.after(START_PAUSE, self._handle_frame)
 
