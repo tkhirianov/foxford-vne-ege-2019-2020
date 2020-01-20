@@ -7,6 +7,7 @@ GRAVITY_CONSTANT = 3
 START_PAUSE = 1000
 FRAME_TIME = 20  # microseconds
 TANK_RADIUS = 25
+MUZZLE_WIDTH = 10
 MIN_BUBBLE_RADIUS = 30
 MAX_BUBBLE_RADIUS = 40
 
@@ -20,19 +21,37 @@ class Tank:
 
     def __init__(self, x, y, canvas):
         self.r = r = TANK_RADIUS
+        self.muzzle_l = TANK_RADIUS * 2
         self.x = x
         self.y = y
+        self.muzzle_dx = 0
+        self.muzzle_dy = -self.muzzle_l
         self._canvas = canvas
-        self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="darkgreen")
+        self._muzzle_id = canvas.create_line(x, y, x + self.muzzle_dx, y + self.muzzle_dy, width=MUZZLE_WIDTH)
+        self._turret_id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="darkgreen")
 
-    def aim(self, x, y):
-        print('tank is aiming to', x, y)
+    def aim(self, event_x, event_y):
+        """ Прицеливание дула по направлению к точке (event_x, event_y)
+            Используется подобобие треугольников по двум углам.
+            muzzle_l / length == muzzle_dx / dx == muzzle_dy / dy
+        """
+        dx = event_x - self.x
+        dy = event_y - self.y
+        length = (dx**2 + dy**2) ** 0.5
+        self.muzzle_dx = self.muzzle_l / length * dx
+        self.muzzle_dy = self.muzzle_l / length * dy
+        self._canvas.coords(self._muzzle_id, self.x, self.y, self.x + self.muzzle_dx, self.y + self.muzzle_dy)
 
     def can_shoot(self):
         return True  # fixme: хорошо бы считать сколько снарядов осталось
 
     def shoot(self, x, y):
-        shell = Shell(self.x, self.y, 5, -5, 5, self._canvas)  # fixme: тут нужно смотреть куда же мы в итоге стреляем
+        self.aim(x, y)
+        velocity = 5
+        vx = velocity * self.muzzle_dx / self.muzzle_l
+        vy = velocity * self.muzzle_dy / self.muzzle_l
+        shell = Shell(self.x + self.muzzle_dx, self.y + self.muzzle_dy, vx, vy,
+                      MUZZLE_WIDTH // 2, self._canvas)
         return shell
 
 
