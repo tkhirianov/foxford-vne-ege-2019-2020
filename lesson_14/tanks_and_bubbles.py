@@ -61,15 +61,20 @@ class Shell:
     """
 
     def __init__(self, x, y, vx, vy, r, canvas):
+        self._zombie = False
         self.x = x
         self.y = y
         self.vx = vx
         self.vy = vy
         self.r = r
+        self._timeout = 200  # fixme: откалибровать по геймплею
         self._canvas = canvas
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="black")
 
     def move(self):
+        self._timeout -= 1
+        if self._timeout <= 0:
+            self.destroy()
         self._canvas.coords(self.id,
                             self.x - self.r, self.y - self.r,
                             self.x + self.r, self.y + self.r)
@@ -89,6 +94,20 @@ class Shell:
             self.y = HEIGHT - self.r
             self.vy = -self.vy
 
+    def check_hit(self, target):
+        return target.is_inside(self)
+
+    def destroy(self):
+        self._zombie = True
+        self._canvas.delete(self.id)
+
+    def cause_damage(self, target):
+        self.destroy()
+        target.destroy()
+
+    def is_zombie(self):
+        return self._zombie
+
 
 class Bubble:
     """ Пузырик, который разрушается снарядом,
@@ -98,6 +117,7 @@ class Bubble:
     """
 
     def __init__(self, x, y, vx, vy, r, canvas):
+        self._zombie = False
         self.x = x
         self.y = y
         self.vx = vx
@@ -140,6 +160,13 @@ class Bubble:
         self.vy, other.vy = other.vy, self.vy
         # FIXME!
 
+    def is_zombie(self):
+        return self._zombie
+
+    def destroy(self):
+        self._zombie = True
+        self._canvas.delete(self.id)
+
 
 class GameRound:
     """ Игровой раунд.
@@ -174,6 +201,7 @@ class GameRound:
         canvas.bind("<Button-1>", self._handle_click)
 
     def _handle_frame(self):
+        # расчёт перемещений всех целей
         for target in self._targets:
             target.move()
         # Попарное взаимодействие целей друг с другом
@@ -183,8 +211,21 @@ class GameRound:
                 target_2 = self._targets[k]
                 if target_1.is_inside(target_2):
                     target_1.collide(target_2)
+        # расчёт перемещений всех снарядов
         for shell in self._shells:
             shell.move()
+        # расчёт взаимодействий всех снарядов со всеми целями
+        for shell in self._shells:
+            for target in self._targets:
+                if shell.check_hit(target):
+                    shell.cause_damage(target)
+        # удаляю все цели-зомби и снаряды-зомби (те, которые должны быть уничтожены)
+        for target in self._targets:
+            if target.is_zombie():
+                self._targets.remove(target)
+        for shell in self._shells:
+            if shell.is_zombie():
+                self._shells.remove(shell)
 
         self._canvas.after(FRAME_TIME, self._handle_frame)
 
