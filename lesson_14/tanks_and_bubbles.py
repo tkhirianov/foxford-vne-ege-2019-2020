@@ -25,6 +25,16 @@ class Tank:
         self._canvas = canvas
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="darkgreen")
 
+    def aim(self, x, y):
+        print('tank is aiming to', x, y)
+
+    def can_shoot(self):
+        return True  # fixme: хорошо бы считать сколько снарядов осталось
+
+    def shoot(self, x, y):
+        shell = Shell(self.x, self.y, 5, -5, 5, self._canvas)  # fixme: тут нужно смотреть куда же мы в итоге стреляем
+        return shell
+
 
 class Shell:
     """ Снаряд, который летит под действием гравитации,
@@ -39,6 +49,26 @@ class Shell:
         self.r = r
         self._canvas = canvas
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="black")
+
+    def move(self):
+        self._canvas.coords(self.id,
+                            self.x - self.r, self.y - self.r,
+                            self.x + self.r, self.y + self.r)
+        self.x += self.vx * DT
+        self.y += self.vy * DT
+
+        if self.x < self.r:
+            self.x = self.r
+            self.vx = -self.vx
+        if self.x > WIDTH - self.r:
+            self.x = WIDTH - self.r
+            self.vx = -self.vx
+        if self.y < self.r:
+            self.y = self.r
+            self.vy = -self.vy
+        if self.y > HEIGHT - self.r:
+            self.y = HEIGHT - self.r
+            self.vy = -self.vy
 
 
 class Bubble:
@@ -121,7 +151,7 @@ class GameRound:
             self._targets.append(bubble)
 
         canvas.after(START_PAUSE, self._handle_frame)
-        canvas.bind("<Move>", self._handle_move)
+        canvas.bind("<Motion>", self._handle_move)
         canvas.bind("<Button-1>", self._handle_click)
 
     def _handle_frame(self):
@@ -134,12 +164,20 @@ class GameRound:
                 target_2 = self._targets[k]
                 if target_1.is_inside(target_2):
                     target_1.collide(target_2)
+        for shell in self._shells:
+            shell.move()
+
+        self._canvas.after(FRAME_TIME, self._handle_frame)
 
     def _handle_move(self, event):
-        print('handled move')
+        self._tank.aim(event.x, event.y)
 
     def _handle_click(self, event):
-        print('handled click')
+        if self._tank.can_shoot():
+            new_shell = self._tank.shoot(event.x, event.y)
+            self._shells.append(new_shell)
+        else:
+            print('This tank can\'t shoot')
 
 
 # ======== Control and View ========
