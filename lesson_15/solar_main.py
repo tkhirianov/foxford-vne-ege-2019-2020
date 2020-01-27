@@ -3,9 +3,9 @@
 
 import tkinter
 from tkinter.filedialog import *
-from solar_vis import *
-from solar_model import *
-from solar_input import *
+from lesson_15.solar_vis import *
+from lesson_15.solar_model import *
+from lesson_15.solar_input import *
 
 perform_execution = False
 """Флаг цикличности выполнения расчёта"""
