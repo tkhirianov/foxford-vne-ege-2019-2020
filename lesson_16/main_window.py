@@ -24,7 +24,7 @@ class MainWindow:
         canvas = tk.Canvas(self._root, height=HEIGHT, width=WIDTH,
                            background="lightblue", border=3)
         canvas.pack()
-        self._game = GameRound(canvas, 1, 2)
+        self._game = GameRound(canvas, 1, PLAYERS_NUMBER)
 
     def _restart_button_handler(self):
         if self._game is None:
