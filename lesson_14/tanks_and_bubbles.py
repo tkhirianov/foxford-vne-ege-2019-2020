@@ -156,9 +156,19 @@ class Bubble:
 
     def collide(self, other):
         """ Обмен скоростями при столновении. """
-        self.vx, other.vx = other.vx, self.vx
-        self.vy, other.vy = other.vy, self.vy
-        # FIXME!
+        dx, dy = (other.x - self.x, other.y - self.y)
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+        nx, ny = (dx / distance, dy / distance)
+        v1_normal = self.vx * nx + self.vy * ny
+        v2_normal = other.vx * nx + other.vy * ny
+        # обмен нормальными компонентами скорости
+        v1_new_normal = v2_normal
+        v2_new_normal = v1_normal
+
+        self.vx += (v1_new_normal - v1_normal) * nx
+        self.vy += (v1_new_normal - v1_normal) * ny
+        other.vx += (v2_new_normal - v2_normal) * nx
+        other.vy += (v2_new_normal - v2_normal) * ny
 
     def is_zombie(self):
         return self._zombie

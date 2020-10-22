@@ -3,13 +3,13 @@
 import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
-FPS = 5
-DT = 0.02
+FPS = 25
+DT = 0.01
 GRAVITY_CONSTANT = 3
-R0 = (100, 100)
-V0 = (10, 15)
-R1 = (200, 200)
-V1 = (-15, -15)
+R0 = (300, 100)
+V0 = (0, 25)
+R1 = (400, 200)
+V1 = (-25, 0)
 
 
 # ========= Model ==========
@@ -80,8 +80,8 @@ class MaterialPoint:
 
         self.vx += (v1_new_normal - v1_normal) * nx
         self.vy += (v1_new_normal - v1_normal) * ny
-        other.vx = (v2_new_normal - v2_normal) * nx
-        other.vy = (v2_new_normal - v2_normal) * ny
+        other.vx += (v2_new_normal - v2_normal) * nx
+        other.vy += (v2_new_normal - v2_normal) * ny
 
 
 

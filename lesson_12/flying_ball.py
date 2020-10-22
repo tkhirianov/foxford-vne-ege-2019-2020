@@ -1,4 +1,5 @@
-from random import randint
+# coding=utf-8
+
 import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
@@ -8,18 +9,13 @@ GRAVITY_CONSTANT = 3
 
 # ========= Model ==========
 class Ball:
-    def __init__(self):
-        self.image = tk.PhotoImage(file="ball.png")
-        self.width = self.image.width()
-        self.height = self.image.height()
-        assert self.width == self.height, "С такой картинкой не получится"
-        self.radius = self.width // 2
-
-        self.x = randint(self.radius, WIDTH - self.radius - 1)
-        self.y = randint(self.radius, HEIGHT - self.radius - 1)
-        self.vx = randint(-5, +5)
-        self.vy = randint(-5, +5)
-        self.id = canvas.create_image(self.x, self.y, image=self.image)
+    def __init__(self, x, y, vx, vy, r):
+        self.radius = r
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+        self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="cyan")
 
     def move(self):
         canvas.coords(self.id, self.x, self.y)
@@ -41,6 +37,9 @@ class Ball:
         squared_distance = (self.x - x)**2 + (self.y - y)**2
         return squared_distance <= self.radius**2
 
+    def delete(self):
+
+
 
 # ======== Control and View ========
 def canvas_click_handler(event):
@@ -56,13 +55,9 @@ def canvas_click_handler(event):
         balls.remove(ball_to_delete)
 
 
-def restart_button_handler():
-    global scores, balls
-    scores = 0
-    scores_label["text"] = str(scores)
+def start_button_handler():
+    global balls
 
-    for ball in balls:
-        canvas.delete(ball.id)
     balls[:] = [Ball() for i in range(5)]
     print("Типа перезапустили игру...")
 
@@ -89,7 +84,7 @@ def initilization():
                                command=restart_button_handler)
     restart_button.pack()
 
-    balls = [Ball() for i in range(5)]
+    balls = []
 
     # привязка событий:
     canvas.bind("<Button-1>", canvas_click_handler)

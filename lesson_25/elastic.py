@@ -4,7 +4,7 @@ import tkinter as tk
 
 WIDTH, HEIGHT = 450, 380
 FPS = 25
-DT = 1/250
+DT = 1/25
 R0 = (100, 100)
 V0X = 10
 NORMAL_SPRING_LENGTH = 40
